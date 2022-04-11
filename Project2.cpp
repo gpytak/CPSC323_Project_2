@@ -45,6 +45,7 @@ vector<Tokens> lexer(string fileInput);
 int getCol(char character);
 string lexemeName(string token, int lexeme);
 
+
 // ============================================================================
 //  Integer Table
 // ============================================================================
@@ -112,16 +113,15 @@ int main()
 		return 0;
 	}
 	
-    // ============================================================================
-    //  
-    // ============================================================================
-    oFile << "Token" << " \t\t" << "Lexeme" << endl;
+
+	// Output to file
 	while (getline(inFile, fileInput))
 	{
 		tokens = lexer(fileInput);
 		for (int i = 0; i < tokens.size(); i++)
 		{
-			oFile << tokens[i].lexemeName << " \t" << tokens[i].token << endl;
+			oFile << "Lexeme: " << tokens[i].lexemeName << " \t" << "Token: " << tokens[i].token << endl;
+			// Print production rules used
 		}
 	}
 	oFile.close();
