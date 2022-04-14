@@ -1,7 +1,7 @@
 // ============================================================================
 // Programmer: Vincent Hsu, Gregory Pytak, Ethan Ton
 // Date: 04/17/2022
-// Class: CPSC 232
+// Class: CPSC 323
 // Project: Project 2
 // ============================================================================
 #include <iostream>
