@@ -1,6 +1,6 @@
 // ============================================================================
 // Programmer: Vincent Hsu, Gregory Pytak, Ethan Ton
-// Date: 04/15/2022
+// Date: 04/17/2022
 // Class: CPSC 232
 // Project: Project 2
 // ============================================================================
@@ -106,22 +106,22 @@ int main()
 		inFile.open("Input3.txt");
 		oFile.open("output3.txt");
 	}
-    // Check if both out file and in file are properly opened
+	// Check if both out file and in file are properly opened
 	if (!inFile.is_open() || !oFile.is_open())
 	{
 		cout << "Failed to open file." << endl;
 		return 0;
 	}
-	
+
 
 	// Output to file
+	oFile << "Token" << " \t\t" << "Lexeme" << endl;
 	while (getline(inFile, fileInput))
 	{
 		tokens = lexer(fileInput);
 		for (int i = 0; i < tokens.size(); i++)
 		{
-			oFile << "Lexeme: " << tokens[i].lexemeName << " \t" << "Token: " << tokens[i].token << endl;
-			// Print production rules used
+			oFile << tokens[i].lexemeName << " \t" << tokens[i].token << endl;
 		}
 	}
 	oFile.close();
@@ -147,7 +147,7 @@ vector<Tokens> lexer(string fileInput)
 		currentChar = fileInput[i];
 		col = getCol(currentChar);
 		currentState = table[currentState][col];
-		
+
 
 
 		if (isComment == false && col == COMMENT)
@@ -162,7 +162,7 @@ vector<Tokens> lexer(string fileInput)
 		{
 			currentState = COMMENT;
 		}
-		
+
 		if (currentState == REJECT)
 		{
 			if (previousState != SPACE && previousState != COMMENT)
