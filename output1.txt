@@ -1,0 +1,4 @@
+Token 		Lexeme
+IDENTIFIER 	a
+OPERATOR 	+
+IDENTIFIER 	b
