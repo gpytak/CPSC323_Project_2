@@ -115,13 +115,13 @@ int main()
 
 
 	// Output to file
-	oFile << "Token" << " \t\t" << "Lexeme" << endl;
 	while (getline(inFile, fileInput))
 	{
 		tokens = lexer(fileInput);
 		for (int i = 0; i < tokens.size(); i++)
 		{
-			oFile << tokens[i].lexemeName << " \t" << tokens[i].token << endl;
+			oFile << "Lexeme: " << tokens[i].lexemeName << " \t" << "Token: " << tokens[i].token << endl;
+			// Print production rules used
 		}
 	}
 	oFile.close();
@@ -279,4 +279,4 @@ string lexemeName(string token, int lexeme)
 		return "ERROR";
 		break;
 	}
-}// ============================================================================
+}// =	===========================================================================
