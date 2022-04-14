@@ -44,7 +44,7 @@ struct Tokens
 vector<Tokens> lexer(string fileInput);
 int getCol(char character);
 string lexemeName(string token, int lexeme);
-
+string productionRules(string token, string lexeme);
 
 // ============================================================================
 //  Integer Table
@@ -71,6 +71,7 @@ int main()
 	int input;
 	string fileInput = "";
 	vector<Tokens> tokens;
+	string test;
 
 
 	cout << "Please choose which input file to analyze:" << endl;
@@ -120,13 +121,36 @@ int main()
 		tokens = lexer(fileInput);
 		for (int i = 0; i < tokens.size(); i++)
 		{
+			// Print Lexeme and Token
 			oFile << "Lexeme: " << tokens[i].lexemeName << " \t" << "Token: " << tokens[i].token << endl;
+
 			// Print production rules used
+			if (i == 0)
+			{
+				oFile << "<Statement> -> <Assign>" << endl;
+				//cout << tokens[i].lexemeName << endl; // IDENTIFIER
+				//cout << tokens[i].token << endl; // a
+			}
+			test = productionRules(tokens[i].token, tokens[i].lexemeName);
 		}
 	}
 	oFile.close();
 	inFile.close();
 	return 0;
+}
+
+string productionRules(string token, string lexeme)
+{
+	char chartoken = ' ';
+	for (int i = 0; i < token.size(); i++)
+	{
+		chartoken = token[i];
+		if (chartoken == '+')
+		{
+			cout << "hi";
+		}
+	}
+	return lexeme;
 }
 
 // ============================================================================
@@ -147,8 +171,6 @@ vector<Tokens> lexer(string fileInput)
 		currentChar = fileInput[i];
 		col = getCol(currentChar);
 		currentState = table[currentState][col];
-
-
 
 		if (isComment == false && col == COMMENT)
 		{
