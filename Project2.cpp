@@ -124,21 +124,14 @@ int main()
 
 		// Token Parser
 		productionParser(tokens);
+		ruleList[0] = "\n  <Statement> -> <Assign>\n  <Assign> -> <Identifier> = <Expression>";
 
 		for (int i = 0; i < tokens.size(); i++)
 		{
 			// Print Lexeme and Token
-			oFile << "Token: " << tokens[i].tokenName << " \t" << "Lexeme: " << tokens[i].lexemeValue << endl;
+			oFile << "Token: " << tokens[i].tokenName << " \t" << "Lexeme: " << tokens[i].lexemeValue;
 			// Print production rules used
-			if (i == 0)
-			{
-				oFile << "<Statement> -> <Assign>" << endl;
-				oFile << "<Assign> -> <Identifier> = <Expression>" << endl;
-			}
-			else
-			{
-				oFile << ruleList[i] << endl;
-			}
+			oFile << ruleList[i] << endl;
 		}
 	}
 	oFile.close();
@@ -159,17 +152,18 @@ void productionParser(vector<Tokens> &tokens)
 
 	for (int i = 0; i < tokens.size(); i++)
 	{
+		rule = "";
 		nextToken = false;
 		top = parserStack.top();
+
 		if (top != "$" && !parserStack.empty())
 		{
 			while (nextToken == false)
 			{
 				// Top of parserStack
 				top = parserStack.top();
-				cout << endl << tokens[i].lexemeValue << "\t" << top << endl;
 
-				if (top == "=")
+				if (top == "=" || top == ")")
 				{
 					parserStack.pop();
 					nextToken = true;
@@ -179,6 +173,7 @@ void productionParser(vector<Tokens> &tokens)
 				//=== Production E ===
 				if (top == "E") // E -> TQ
 				{
+					rule += "\n  <Expression> -> <Term> <Expression Prime>";
 					parserStack.pop();
 					parserStack.push("Q");
 					parserStack.push("T");
@@ -196,6 +191,7 @@ void productionParser(vector<Tokens> &tokens)
 					}
 					else if (tokens[i].lexemeValue == "+" && top == "+")
 					{
+						rule += "\n  <Expression Prime> -> + <Term> <Expression Prime>";
 						parserStack.pop();
 						nextToken = true;
 						break;
@@ -209,12 +205,14 @@ void productionParser(vector<Tokens> &tokens)
 					}
 					else if (tokens[i].lexemeValue == "-" && top == "-")
 					{
+						rule += "\n  <Expression Prime> -> - <Term> <Expression Prime>";
 						parserStack.pop();
 						nextToken = true;
 						break;
 					}
 					else
 					{
+						rule += "\n  <Expression Prime> -> <Epsilon>";
 						parserStack.pop();
 					}
 				}
@@ -222,6 +220,7 @@ void productionParser(vector<Tokens> &tokens)
 				//=== Production T ===
 				if (top == "T") // T -> FR
 				{
+					rule += "\n  <Term> -> <Factor> <Term Prime>";
 					parserStack.pop();
 					parserStack.push("R");
 					parserStack.push("F");
@@ -239,6 +238,7 @@ void productionParser(vector<Tokens> &tokens)
 					}
 					else if (tokens[i].lexemeValue == "*" && top == "*")
 					{
+						rule += "\n  <Term Prime> -> * <Factor> <Term Prime>";
 						parserStack.pop();
 						nextToken = true;
 						break;
@@ -252,12 +252,14 @@ void productionParser(vector<Tokens> &tokens)
 					}
 					else if (tokens[i].lexemeValue == "/" && top == "/")
 					{
+						rule += "\n  <Term Prime> -> / <Factor> <Term Prime>";
 						parserStack.pop();
 						nextToken = true;
 						break;
 					}
 					else
 					{
+						rule += "\n  <Term Prime> -> <Epsilon>";
 						parserStack.pop();
 					}
 				}
@@ -274,6 +276,7 @@ void productionParser(vector<Tokens> &tokens)
 					}
 					else if (tokens[i].lexemeValue == "(" && top == "(")
 					{
+						rule += "\n  <Factor> -> ( <Expression> )";
 						parserStack.pop();
 						nextToken = true;
 						break;
@@ -285,6 +288,7 @@ void productionParser(vector<Tokens> &tokens)
 					}
 					else if (tokens[i].tokenName == "IDENTIFIER" && top == "i")
 					{
+						rule += "\n  <Factor> -> <Identifier>";
 						parserStack.pop();
 						nextToken = true;
 						break;
@@ -293,17 +297,16 @@ void productionParser(vector<Tokens> &tokens)
 			}
 		}
 		else
+		{
+			if (!parserStack.empty())
+				cout << "Error: Stack is empty" << endl;
+			if (top != "$")
+				cout << "Stack reached $" << endl;
 			break;
-
-		// S -> E
-		// E -> TQ
-		// Q -> +TQ | -TQ | e
-		// T -> FR
-		// R -> *FR | /FR | e
-		// F -> (E) | i
+		}
 
 		// Before next input, record production rules used
-		//ruleList[i] = rule;
+		ruleList[i] = rule;
 	}
 }
 
