@@ -13,6 +13,7 @@
 using namespace std;
 
 bool isComment = false;
+string rules[30];
 
 // These are the inputs for the FSM.
 enum TransitionStates {
@@ -33,9 +34,9 @@ enum TransitionStates {
 // ============================================================================
 struct Tokens
 {
-	string token;
+	string lexemeValue;
 	int lexeme;
-	string lexemeName;
+	string tokenName;
 };
 
 // ============================================================================
@@ -43,8 +44,9 @@ struct Tokens
 // ============================================================================
 vector<Tokens> lexer(string fileInput);
 int getCol(char character);
-string lexemeName(string token, int lexeme);
-string productionRules(string token, string lexeme);
+string tokenName(string token, int lexeme);
+void productionParser(vector<Tokens> &tokens);
+//bool production
 
 // ============================================================================
 //  Integer Table
@@ -71,7 +73,6 @@ int main()
 	int input;
 	string fileInput = "";
 	vector<Tokens> tokens;
-	string test;
 
 
 	cout << "Please choose which input file to analyze:" << endl;
@@ -114,24 +115,25 @@ int main()
 		return 0;
 	}
 
-
 	// Output to file
 	while (getline(inFile, fileInput))
 	{
 		tokens = lexer(fileInput);
+		productionParser(tokens);
 		for (int i = 0; i < tokens.size(); i++)
 		{
 			// Print Lexeme and Token
-			oFile << "Lexeme: " << tokens[i].lexemeName << " \t" << "Token: " << tokens[i].token << endl;
-
+			oFile << "Token: " << tokens[i].tokenName << " \t" << "Lexeme: " << tokens[i].lexemeValue << endl;
 			// Print production rules used
 			if (i == 0)
 			{
 				oFile << "<Statement> -> <Assign>" << endl;
-				//cout << tokens[i].lexemeName << endl; // IDENTIFIER
-				//cout << tokens[i].token << endl; // a
+				oFile << "<Assign> -> <Identifier> = <Expression>" << endl;
 			}
-			test = productionRules(tokens[i].token, tokens[i].lexemeName);
+			else
+			{
+				oFile << rules[i] << endl;
+			}
 		}
 	}
 	oFile.close();
@@ -139,18 +141,26 @@ int main()
 	return 0;
 }
 
-string productionRules(string token, string lexeme)
+void productionParser(vector<Tokens> &tokens)
 {
-	char chartoken = ' ';
-	for (int i = 0; i < token.size(); i++)
+	string temp;
+	for (int i = 0; i < tokens.size(); i++)
 	{
-		chartoken = token[i];
-		if (chartoken == '+')
+		temp = " ";
+		cout << tokens[i].lexemeValue << endl;
+		if (tokens[i].tokenName == "OPERATOR" || tokens[i].tokenName == "SEPARATOR")
 		{
-			cout << "hi";
+			temp = tokens[i].lexemeValue;
 		}
+		if (tokens[i].tokenName == "IDENTIFIER")
+		{
+
+		}
+		
+		// Inputting production rules into rules[]
+		rules[i] = temp;
+		//cout << rules[i] << endl;
 	}
-	return lexeme;
 }
 
 // ============================================================================
@@ -189,9 +199,9 @@ vector<Tokens> lexer(string fileInput)
 		{
 			if (previousState != SPACE && previousState != COMMENT)
 			{
-				type.token = currentToken;
+				type.lexemeValue = currentToken;
 				type.lexeme = previousState;
-				type.lexemeName = lexemeName(type.token, type.lexeme);
+				type.tokenName = tokenName(type.lexemeValue, type.lexeme);
 				tokens.push_back(type);
 			}
 			currentToken = "";
@@ -205,9 +215,9 @@ vector<Tokens> lexer(string fileInput)
 	}
 	if (currentState != SPACE && currentToken != "" && previousState != COMMENT)
 	{
-		type.token = currentToken;
+		type.lexemeValue = currentToken;
 		type.lexeme = currentState;
-		type.lexemeName = lexemeName(type.token, type.lexeme);
+		type.tokenName = tokenName(type.lexemeValue, type.lexeme);
 		tokens.push_back(type);
 	}
 	return tokens;
@@ -257,11 +267,11 @@ int getCol(char character)
 }
 
 // ============================================================================
-//  lexemeName
+//  tokenName
 //      INPUT  - currentState
 //      OUTPUT - Name of Lexeme
 // ============================================================================
-string lexemeName(string token, int lexeme)
+string tokenName(string token, int lexeme)
 {
 	switch (lexeme)
 	{
@@ -302,8 +312,3 @@ string lexemeName(string token, int lexeme)
 		break;
 	}
 }// =	===========================================================================
-
-// ============================================================================
-//	Project 2
-// ============================================================================
-
