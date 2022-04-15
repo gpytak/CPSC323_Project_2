@@ -1,4 +1,14 @@
-Token 		Lexeme
-IDENTIFIER 	a
-OPERATOR 	+
-IDENTIFIER 	b
+Token: IDENTIFIER 	Lexeme: x
+  <Statement> -> <Assign>
+  <Assign> -> <Identifier> = <Expression>
+Token: OPERATOR 	Lexeme: =
+Token: IDENTIFIER 	Lexeme: a
+  <Expression> -> <Term> <Expression Prime>
+  <Term> -> <Factor> <Term Prime>
+  <Factor> -> <Identifier>
+Token: OPERATOR 	Lexeme: +
+  <Term Prime> -> <Epsilon>
+  <Expression Prime> -> + <Term> <Expression Prime>
+Token: IDENTIFIER 	Lexeme: b
+  <Term> -> <Factor> <Term Prime>
+  <Factor> -> <Identifier>
