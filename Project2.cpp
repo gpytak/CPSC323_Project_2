@@ -9,11 +9,12 @@
 #include <string>
 #include <iomanip>
 #include <fstream>
+#include <stack>
 
 using namespace std;
 
 bool isComment = false;
-string rules[30]; // temporary WIP
+string ruleList[30];
 
 // These are the inputs for the FSM.
 enum TransitionStates {
@@ -64,12 +65,6 @@ int table[9][9] =
 /* STATE 8 */ {UNKNOWN,   UNKNOWN    ,   UNKNOWN    ,   UNKNOWN    ,   UNKNOWN    ,  UNKNOWN    ,   UNKNOWN    ,  UNKNOWN,  UNKNOWN  } };
 
 // ============================================================================
-// 	Parser Table
-// ============================================================================
-int table[6][8];
-
-
-// ============================================================================
 //  MAIN
 // ============================================================================
 int main()
@@ -80,7 +75,7 @@ int main()
 	string fileInput = "";
 	vector<Tokens> tokens;
 
-	
+
 	cout << "Please choose which input file to analyze:" << endl;
 	cout << "1: Input File 1" << endl;
 	cout << "2: Input File 2" << endl;
@@ -142,7 +137,7 @@ int main()
 			}
 			else
 			{
-				oFile << rules[i] << endl;
+				oFile << ruleList[i] << endl;
 			}
 		}
 	}
@@ -151,28 +146,164 @@ int main()
 	return 0;
 }
 
-// ============================================================================
-//	Production Parser
-// ============================================================================
 void productionParser(vector<Tokens> &tokens)
 {
-	string temp;
+	string top, rule;
+	bool nextToken = false;
+	stack<string> parserStack;
+	// S -> E
+	parserStack.push("$");
+	parserStack.push("E");
+	parserStack.push("=");
+	parserStack.push("i");
+
 	for (int i = 0; i < tokens.size(); i++)
 	{
-		temp = " ";
-		cout << tokens[i].lexemeValue << endl;
-		if (tokens[i].tokenName == "OPERATOR" || tokens[i].tokenName == "SEPARATOR")
+		nextToken = false;
+		top = parserStack.top();
+		if (top != "$" && !parserStack.empty())
 		{
-			temp = tokens[i].lexemeValue;
-		}
-		if (tokens[i].tokenName == "IDENTIFIER")
-		{
+			while (nextToken == false)
+			{
+				// Top of parserStack
+				top = parserStack.top();
+				cout << endl << tokens[i].lexemeValue << "\t" << top << endl;
 
+				if (top == "=")
+				{
+					parserStack.pop();
+					nextToken = true;
+					break;
+				}
+
+				//=== Production E ===
+				if (top == "E") // E -> TQ
+				{
+					parserStack.pop();
+					parserStack.push("Q");
+					parserStack.push("T");
+				}
+
+				//=== Production Q ===
+				if (top == "Q" || top == "+" || top == "-") // Q -> +TQ | -TQ | e
+				{
+					if (tokens[i].lexemeValue == "+" && top != "+")
+					{
+						parserStack.pop();
+						parserStack.push("Q");
+						parserStack.push("T");
+						parserStack.push("+");
+					}
+					else if (tokens[i].lexemeValue == "+" && top == "+")
+					{
+						parserStack.pop();
+						nextToken = true;
+						break;
+					}
+					else if (tokens[i].lexemeValue == "-" && top != "-")
+					{
+						parserStack.pop();
+						parserStack.push("Q");
+						parserStack.push("T");
+						parserStack.push("-");
+					}
+					else if (tokens[i].lexemeValue == "-" && top == "-")
+					{
+						parserStack.pop();
+						nextToken = true;
+						break;
+					}
+					else
+					{
+						parserStack.pop();
+					}
+				}
+
+				//=== Production T ===
+				if (top == "T") // T -> FR
+				{
+					parserStack.pop();
+					parserStack.push("R");
+					parserStack.push("F");
+				}
+
+				//=== Production R ===
+				if (top == "R" || top == "*" || top == "/") // R -> *FR | /FR | e
+				{
+					if (tokens[i].lexemeValue == "*" && top != "*")
+					{
+						parserStack.pop();
+						parserStack.push("R");
+						parserStack.push("F");
+						parserStack.push("*");
+					}
+					else if (tokens[i].lexemeValue == "*" && top == "*")
+					{
+						parserStack.pop();
+						nextToken = true;
+						break;
+					}
+					else if (tokens[i].lexemeValue == "/" && top != "/")
+					{
+						parserStack.pop();
+						parserStack.push("R");
+						parserStack.push("F");
+						parserStack.push("/");
+					}
+					else if (tokens[i].lexemeValue == "/" && top == "/")
+					{
+						parserStack.pop();
+						nextToken = true;
+						break;
+					}
+					else
+					{
+						parserStack.pop();
+					}
+				}
+
+				// === Production F ===
+				if (top == "F" || top == "(" || top == "i") // F -> (E) | i
+				{
+					if (tokens[i].lexemeValue == "(" && top != "(")
+					{
+						parserStack.pop();
+						parserStack.push(")");
+						parserStack.push("E");
+						parserStack.push("(");
+					}
+					else if (tokens[i].lexemeValue == "(" && top == "(")
+					{
+						parserStack.pop();
+						nextToken = true;
+						break;
+					}
+					else if (tokens[i].tokenName == "IDENTIFIER" && top != "i")
+					{
+						parserStack.pop();
+						parserStack.push("i");
+					}
+					else if (tokens[i].tokenName == "IDENTIFIER" && top == "i")
+					{
+						parserStack.pop();
+						nextToken = true;
+						break;
+					}
+				}
+			}
 		}
-		
-		// Inputting production rules into rules[]
-		rules[i] = temp;
-		//cout << rules[i] << endl;
+		else
+			break;
+
+		// S -> E
+		// E -> TQ
+		// Q -> +TQ | -TQ | e
+		// T -> FR
+		// R -> *FR | /FR | e
+		// F -> (E) | i
+
+		// Before next input, record production rules used
+		//ruleList[i] = rule;
 	}
 }
 
@@ -324,5 +455,4 @@ string tokenName(string token, int lexeme)
 		return "ERROR";
 		break;
 	}
-}
-// ============================================================================
+}// =	===========================================================================
