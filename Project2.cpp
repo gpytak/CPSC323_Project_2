@@ -13,7 +13,7 @@
 using namespace std;
 
 bool isComment = false;
-string rules[30];
+string rules[30]; // temporary WIP
 
 // These are the inputs for the FSM.
 enum TransitionStates {
@@ -62,6 +62,12 @@ int table[9][9] =
 /* STATE 6 */ {SEPARATOR, REJECT     ,   REJECT     ,   REJECT     ,   REJECT     ,  REJECT     ,   REJECT     ,  COMMENT,  REJECT  },
 /* STATE 7 */ {COMMENT,  COMMENT     ,   COMMENT    ,   COMMENT    ,   COMMENT    ,  COMMENT    ,   COMMENT    ,  REJECT ,  COMMENT  },
 /* STATE 8 */ {UNKNOWN,   UNKNOWN    ,   UNKNOWN    ,   UNKNOWN    ,   UNKNOWN    ,  UNKNOWN    ,   UNKNOWN    ,  UNKNOWN,  UNKNOWN  } };
+
+// ============================================================================
+// 	Parser Table
+// ============================================================================
+int table[6][8];
+
 
 // ============================================================================
 //  MAIN
@@ -141,6 +147,9 @@ int main()
 	return 0;
 }
 
+// ============================================================================
+//	Production Parser
+// ============================================================================
 void productionParser(vector<Tokens> &tokens)
 {
 	string temp;
@@ -311,4 +320,5 @@ string tokenName(string token, int lexeme)
 		return "ERROR";
 		break;
 	}
-}// =	===========================================================================
+}
+// =	===========================================================================
