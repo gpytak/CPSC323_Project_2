@@ -80,7 +80,7 @@ int main()
 	string fileInput = "";
 	vector<Tokens> tokens;
 
-
+	
 	cout << "Please choose which input file to analyze:" << endl;
 	cout << "1: Input File 1" << endl;
 	cout << "2: Input File 2" << endl;
@@ -124,8 +124,12 @@ int main()
 	// Output to file
 	while (getline(inFile, fileInput))
 	{
+		// Lexical Analyzer
 		tokens = lexer(fileInput);
+
+		// Token Parser
 		productionParser(tokens);
+
 		for (int i = 0; i < tokens.size(); i++)
 		{
 			// Print Lexeme and Token
@@ -321,4 +325,4 @@ string tokenName(string token, int lexeme)
 		break;
 	}
 }
-// =	===========================================================================
+// ============================================================================
