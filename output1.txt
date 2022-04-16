@@ -14,3 +14,4 @@ Token: IDENTIFIER 	Lexeme: b
   <Factor> -> <Identifier>
   <Term Prime> -> <Epsilon>
   <Expression Prime> -> <Epsilon>
+String accepted.
