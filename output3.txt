@@ -27,3 +27,5 @@ Token: OPERATOR 	Lexeme: /
   <Term Prime> -> / <Factor> <Term Prime>
 Token: IDENTIFIER 	Lexeme: d
   <Factor> -> <Identifier>
+  <Term Prime> -> <Epsilon>
+  <Expression Prime> -> <Epsilon>
