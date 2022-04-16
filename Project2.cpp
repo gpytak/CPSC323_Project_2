@@ -145,6 +145,7 @@ int main()
 				}
 			}
 		}
+		oFile << "String accepted.";
 	}
 	oFile.close();
 	inFile.close();
@@ -169,7 +170,7 @@ void productionParser(vector<Tokens> &tokens)
 		nextToken = false;
 		top = parserStack.top();
 
-		if (top != "$" && !parserStack.empty())
+		if (!parserStack.empty())
 		{
 			while (nextToken == false)
 			{
@@ -313,14 +314,14 @@ void productionParser(vector<Tokens> &tokens)
 		{
 			if (!parserStack.empty())
 				cout << "Error: Stack is empty" << endl;
-			if (top != "$")
-				cout << "Stack reached $" << endl;
 			break;
 		}
 
 		// Finishing off unused production rules with epsilon
 		if (tokenLength == i)
 		{
+			rule += "\nToken: END \t\tLexeme: $";
+			ruleList[i] = rule;
 			while (top != "$" && !parserStack.empty())
 			{
 				//cout << "Start: " << top << endl;
