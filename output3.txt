@@ -29,3 +29,4 @@ Token: IDENTIFIER 	Lexeme: d
   <Factor> -> <Identifier>
   <Term Prime> -> <Epsilon>
   <Expression Prime> -> <Epsilon>
+String accepted.
