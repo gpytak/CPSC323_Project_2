@@ -12,3 +12,5 @@ Token: OPERATOR 	Lexeme: +
 Token: IDENTIFIER 	Lexeme: b
   <Term> -> <Factor> <Term Prime>
   <Factor> -> <Identifier>
+  <Term Prime> -> <Epsilon>
+  <Expression Prime> -> <Epsilon>
