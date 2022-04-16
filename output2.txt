@@ -42,3 +42,4 @@ Token: IDENTIFIER 	Lexeme: f
   <Factor> -> <Identifier>
   <Term Prime> -> <Epsilon>
   <Expression Prime> -> <Epsilon>
+String accepted.
