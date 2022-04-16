@@ -121,17 +121,29 @@ int main()
 	{
 		// Lexical Analyzer
 		tokens = lexer(fileInput);
-
 		// Token Parser
 		productionParser(tokens);
 		ruleList[0] = "\n  <Statement> -> <Assign>\n  <Assign> -> <Identifier> = <Expression>";
+		const int tokenLength = tokens.size();
 
 		for (int i = 0; i < tokens.size(); i++)
 		{
-			// Print Lexeme and Token
-			oFile << "Token: " << tokens[i].tokenName << " \t" << "Lexeme: " << tokens[i].lexemeValue;
-			// Print production rules used
-			oFile << ruleList[i] << endl;
+			if (tokenLength != i)
+			{
+				// Print Lexeme and Token
+				oFile << "Token: " << tokens[i].tokenName << " \t" << "Lexeme: " << tokens[i].lexemeValue;
+				// Print used production rules
+				oFile << ruleList[i] << endl;
+			}
+			if (tokenLength == i)
+			{
+				while (!ruleList[i].empty())
+				{
+					// Print unused production rules
+					oFile << ruleList[i] << endl;
+					i++;
+				}
+			}
 		}
 	}
 	oFile.close();
@@ -142,6 +154,7 @@ int main()
 void productionParser(vector<Tokens> &tokens)
 {
 	string top, rule;
+	const int tokenLength = (tokens.size() - 1);
 	bool nextToken = false;
 	stack<string> parserStack;
 	// S -> E
@@ -303,6 +316,34 @@ void productionParser(vector<Tokens> &tokens)
 			if (top != "$")
 				cout << "Stack reached $" << endl;
 			break;
+		}
+
+		// Finishing off unused production rules with epsilon
+		if (tokenLength == i)
+		{
+			while (top != "$" && !parserStack.empty())
+			{
+				//cout << "Start: " << top << endl;
+				top = parserStack.top();
+
+				//=== Production Q ===
+				if (top == "Q") // Q -> e
+				{
+					rule += "\n  <Expression Prime> -> <Epsilon>";
+					parserStack.pop();
+				}
+
+				//=== Production R ===
+				if (top == "R") // R -> e
+				{
+						rule += "\n  <Term Prime> -> <Epsilon>";
+						parserStack.pop();
+				}
+
+				ruleList[i] = rule;
+				top = parserStack.top();
+				//cout << "End: " << top << endl;
+			}
 		}
 
 		// Before next input, record production rules used
