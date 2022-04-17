@@ -159,6 +159,11 @@ int main()
 		{
 			oFile << "\nString accepted.";
 		}
+		else
+		{
+			oFile << "\nString not accepted.";
+		}
+
 	}
 	oFile.close();
 	inFile.close();
@@ -181,11 +186,11 @@ void productionParser(vector<Tokens> &tokens)
 		}
 	}
 	ruleList[0] = "\n\t<Statement> -> <Assign>\n\t<Assign> -> <Identifier> = <Expression>";
-	if (productionE(tokenIndex) == true)
+	if (productionE(tokenIndex) != true)
 	{
 		error = true;
 		errorIndex = tokenIndex;
-		stringAccepted == false;
+		stringAccepted = false;
 	}
 }
 
