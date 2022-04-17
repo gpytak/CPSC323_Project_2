@@ -185,6 +185,7 @@ void productionParser(vector<Tokens> &tokens)
 	{
 		error = true;
 		errorIndex = tokenIndex;
+		stringAccepted == false;
 	}
 }
 
