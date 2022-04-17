@@ -150,7 +150,7 @@ int main()
 					oFile << ruleList[i];
 				}
 			}
-			if (errorIndex == i and error == true)
+			if (errorIndex == i && error == true)
 			{
 				break;
 			}
