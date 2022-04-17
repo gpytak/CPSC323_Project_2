@@ -9,12 +9,18 @@
 #include <string>
 #include <iomanip>
 #include <fstream>
-#include <stack>
 
 using namespace std;
 
+bool stringAccepted = true;
+bool error = false;
+int errorIndex;
+int tokenIndex = 2;
 bool isComment = false;
+string s[30];
+string currentRule;
 string ruleList[30];
+ofstream oFile;
 
 // These are the inputs for the FSM.
 enum TransitionStates {
@@ -47,7 +53,11 @@ vector<Tokens> lexer(string fileInput);
 int getCol(char character);
 string tokenName(string token, int lexeme);
 void productionParser(vector<Tokens> &tokens);
-//bool production
+bool productionE(int& tokenIndex);
+bool productionQ(int& tokenIndex);
+bool productionT(int& tokenIndex);
+bool productionR(int& tokenIndex);
+bool productionF(int& tokenIndex);
 
 // ============================================================================
 //  Integer Table
@@ -70,7 +80,6 @@ int table[9][9] =
 int main()
 {
 	ifstream inFile;
-	ofstream oFile;
 	int input;
 	string fileInput = "";
 	vector<Tokens> tokens;
@@ -121,235 +130,218 @@ int main()
 	{
 		// Lexical Analyzer
 		tokens = lexer(fileInput);
+
 		// Token Parser
 		productionParser(tokens);
-		ruleList[0] = "\n  <Statement> -> <Assign>\n  <Assign> -> <Identifier> = <Expression>";
-		const int tokenLength = tokens.size();
-
+		const int tokenLength = (tokens.size());
 		for (int i = 0; i < tokens.size(); i++)
 		{
-			if (tokenLength != i)
+			// Print Lexeme and Token
+			oFile << "Token: " << tokens[i].tokenName << " \t" << "Lexeme: " << tokens[i].lexemeValue;
+			// Print used production rules
+			oFile << ruleList[i] << endl;
+			if (tokenLength == i+1)
 			{
-				// Print Lexeme and Token
-				oFile << "Token: " << tokens[i].tokenName << " \t" << "Lexeme: " << tokens[i].lexemeValue;
-				// Print used production rules
-				oFile << ruleList[i] << endl;
-			}
-			if (tokenLength == i)
-			{
+				oFile << "Token: END \tLexeme: $";
 				while (!ruleList[i].empty())
 				{
 					// Print unused production rules
-					oFile << ruleList[i] << endl;
 					i++;
+					oFile << ruleList[i];
 				}
 			}
+			if (errorIndex == i and error == true)
+			{
+				break;
+			}
 		}
-		oFile << "String accepted.";
+		if (stringAccepted == true)
+		{
+			oFile << "\nString accepted.";
+		}
 	}
 	oFile.close();
 	inFile.close();
 	return 0;
 }
 
+// =====================================================================
+// Production Parser
+// =====================================================================
 void productionParser(vector<Tokens> &tokens)
 {
-	string top, rule;
 	const int tokenLength = (tokens.size() - 1);
-	bool nextToken = false;
-	stack<string> parserStack;
-	// S -> E
-	parserStack.push("$");
-	parserStack.push("E");
-	parserStack.push("=");
-	parserStack.push("i");
-
 	for (int i = 0; i < tokens.size(); i++)
 	{
-		rule = "";
-		nextToken = false;
-		top = parserStack.top();
-
-		if (!parserStack.empty())
+		s[i] = tokens[i].lexemeValue;
+		if (i == tokenLength)
 		{
-			while (nextToken == false)
-			{
-				// Top of parserStack
-				top = parserStack.top();
-
-				if (top == "=" || top == ")")
-				{
-					parserStack.pop();
-					nextToken = true;
-					break;
-				}
-
-				//=== Production E ===
-				if (top == "E") // E -> TQ
-				{
-					rule += "\n  <Expression> -> <Term> <Expression Prime>";
-					parserStack.pop();
-					parserStack.push("Q");
-					parserStack.push("T");
-				}
-
-				//=== Production Q ===
-				if (top == "Q" || top == "+" || top == "-") // Q -> +TQ | -TQ | e
-				{
-					if (tokens[i].lexemeValue == "+" && top != "+")
-					{
-						parserStack.pop();
-						parserStack.push("Q");
-						parserStack.push("T");
-						parserStack.push("+");
-					}
-					else if (tokens[i].lexemeValue == "+" && top == "+")
-					{
-						rule += "\n  <Expression Prime> -> + <Term> <Expression Prime>";
-						parserStack.pop();
-						nextToken = true;
-						break;
-					}
-					else if (tokens[i].lexemeValue == "-" && top != "-")
-					{
-						parserStack.pop();
-						parserStack.push("Q");
-						parserStack.push("T");
-						parserStack.push("-");
-					}
-					else if (tokens[i].lexemeValue == "-" && top == "-")
-					{
-						rule += "\n  <Expression Prime> -> - <Term> <Expression Prime>";
-						parserStack.pop();
-						nextToken = true;
-						break;
-					}
-					else
-					{
-						rule += "\n  <Expression Prime> -> <Epsilon>";
-						parserStack.pop();
-					}
-				}
-
-				//=== Production T ===
-				if (top == "T") // T -> FR
-				{
-					rule += "\n  <Term> -> <Factor> <Term Prime>";
-					parserStack.pop();
-					parserStack.push("R");
-					parserStack.push("F");
-				}
-
-				//=== Production R ===
-				if (top == "R" || top == "*" || top == "/") // R -> *FR | /FR | e
-				{
-					if (tokens[i].lexemeValue == "*" && top != "*")
-					{
-						parserStack.pop();
-						parserStack.push("R");
-						parserStack.push("F");
-						parserStack.push("*");
-					}
-					else if (tokens[i].lexemeValue == "*" && top == "*")
-					{
-						rule += "\n  <Term Prime> -> * <Factor> <Term Prime>";
-						parserStack.pop();
-						nextToken = true;
-						break;
-					}
-					else if (tokens[i].lexemeValue == "/" && top != "/")
-					{
-						parserStack.pop();
-						parserStack.push("R");
-						parserStack.push("F");
-						parserStack.push("/");
-					}
-					else if (tokens[i].lexemeValue == "/" && top == "/")
-					{
-						rule += "\n  <Term Prime> -> / <Factor> <Term Prime>";
-						parserStack.pop();
-						nextToken = true;
-						break;
-					}
-					else
-					{
-						rule += "\n  <Term Prime> -> <Epsilon>";
-						parserStack.pop();
-					}
-				}
-
-				// === Production F ===
-				if (top == "F" || top == "(" || top == "i") // F -> (E) | i
-				{
-					if (tokens[i].lexemeValue == "(" && top != "(")
-					{
-						parserStack.pop();
-						parserStack.push(")");
-						parserStack.push("E");
-						parserStack.push("(");
-					}
-					else if (tokens[i].lexemeValue == "(" && top == "(")
-					{
-						rule += "\n  <Factor> -> ( <Expression> )";
-						parserStack.pop();
-						nextToken = true;
-						break;
-					}
-					else if (tokens[i].tokenName == "IDENTIFIER" && top != "i")
-					{
-						parserStack.pop();
-						parserStack.push("i");
-					}
-					else if (tokens[i].tokenName == "IDENTIFIER" && top == "i")
-					{
-						rule += "\n  <Factor> -> <Identifier>";
-						parserStack.pop();
-						nextToken = true;
-						break;
-					}
-				}
-			}
+			i++;
+			s[i] = "$";
 		}
-		else
-		{
-			if (!parserStack.empty())
-				cout << "Error: Stack is empty" << endl;
-			break;
-		}
-
-		// Finishing off unused production rules with epsilon
-		if (tokenLength == i)
-		{
-			rule += "\nToken: END \t\tLexeme: $";
-			ruleList[i] = rule;
-			while (top != "$" && !parserStack.empty())
-			{
-				//cout << "Start: " << top << endl;
-				top = parserStack.top();
-
-				//=== Production Q ===
-				if (top == "Q") // Q -> e
-				{
-					rule += "\n  <Expression Prime> -> <Epsilon>";
-					parserStack.pop();
-				}
-
-				//=== Production R ===
-				if (top == "R") // R -> e
-				{
-						rule += "\n  <Term Prime> -> <Epsilon>";
-						parserStack.pop();
-				}
-
-				ruleList[i] = rule;
-				top = parserStack.top();
-				//cout << "End: " << top << endl;
-			}
-		}
-
-		// Before next input, record production rules used
-		ruleList[i] = rule;
 	}
+	ruleList[0] = "\n\t<Statement> -> <Assign>\n\t<Assign> -> <Identifier> = <Expression>";
+	if (productionE(tokenIndex) == true)
+	{
+		error = true;
+		errorIndex = tokenIndex;
+	}
+}
+
+// =====================================================================
+// Production E
+// =====================================================================
+bool productionE(int& tokenIndex)
+{
+	bool E = false;
+	currentRule = ("\n\t<Expression> -> <Term> <Expression Prime>");
+	ruleList[tokenIndex] += currentRule;
+	if (productionT(tokenIndex))
+	{
+		if (productionQ(tokenIndex))
+		{
+			E = true;
+		}
+	}
+	return E;
+}
+
+// =====================================================================
+// Production Q
+// =====================================================================
+bool productionQ(int& tokenIndex)
+{
+	bool Q = false;
+	if (s[tokenIndex] == "+")
+	{
+		currentRule = ("\n\t<Expression Prime> -> + <Term> <Expression Prime>");
+		ruleList[tokenIndex] += currentRule;
+		tokenIndex++;
+		if (productionT(tokenIndex))
+		{
+			if (productionQ(tokenIndex))
+			{
+				Q = true;
+				return Q;
+			}
+		}
+	}
+	if (s[tokenIndex] == "-")
+	{
+		currentRule = ("\n\t<Expression Prime> -> - <Term> <Expression Prime>");
+		ruleList[tokenIndex] += currentRule;
+		tokenIndex++;
+		if (productionT(tokenIndex))
+		{
+			if (productionQ(tokenIndex))
+			{
+				Q = true;
+				return Q;
+			}
+		}
+	}
+	if (s[tokenIndex] == ")" || s[tokenIndex] == "$")
+	{
+		currentRule = ("\n\t<Expression Prime> -> <Epsilon>");
+		ruleList[tokenIndex] += currentRule;
+		if (s[tokenIndex] == ")")
+		{
+			tokenIndex++;
+		}
+		Q = true;
+		return Q;
+	}
+	return Q;
+}
+
+// =====================================================================
+// Production T
+// =====================================================================
+bool productionT(int& tokenIndex)
+{
+	bool T = false;
+	currentRule = ("\n\t<Term> -> <Factor> <Term Prime>");
+	ruleList[tokenIndex] += currentRule;
+	if (productionF(tokenIndex))
+	{
+		if (productionR(tokenIndex))
+		{
+			T = true;
+		}
+	}
+	return T;
+}
+
+// =====================================================================
+// Production R
+// =====================================================================
+bool productionR(int& tokenIndex)
+{
+	bool R = false;
+	if (s[tokenIndex] == ")" || s[tokenIndex] == "+" || s[tokenIndex] == "-" || s[tokenIndex] == "$")
+	{
+		currentRule = ("\n\t<Term Prime> -> <Epsilon>");
+		ruleList[tokenIndex] += currentRule;
+		R = true;
+		return R;
+	}
+	if (s[tokenIndex] == "*")
+	{
+		currentRule = ("\n\t<Term Prime> -> * <Factor> <Term Prime>");
+		ruleList[tokenIndex] += currentRule;
+		tokenIndex++;
+		if (productionF(tokenIndex))
+		{
+			if (productionR(tokenIndex))
+			{
+				R = true;
+				return R;
+			}
+		}
+	}
+	if (s[tokenIndex] == "/")
+	{
+		currentRule = ("\n\t<Term Prime> -> / <Factor> <Term Prime>");
+		ruleList[tokenIndex] += currentRule;
+		tokenIndex++;
+		if (productionF(tokenIndex))
+		{
+			if (productionR(tokenIndex))
+			{
+				R = true;
+				return R;
+			}
+		}
+	}
+	return R;
+}
+
+// =====================================================================
+// Production F
+// =====================================================================
+bool productionF(int& tokenIndex)
+{
+	bool F = false;
+	if (s[tokenIndex] == "(")
+	{
+		currentRule = ("\n\t<Factor> -> ( <Expression> )");
+		ruleList[tokenIndex] += currentRule;
+		tokenIndex++;
+		if (productionE(tokenIndex))
+		{
+			F = true;
+			return F;
+		}
+	}
+	if (s[tokenIndex] >= "a" || s[tokenIndex] <= "z")
+	{
+		currentRule = ("\n\t<Factor> -> <Identifier>");
+		ruleList[tokenIndex] += currentRule;
+		tokenIndex++;
+		F = true;
+		return F;
+	}
+	return F;
 }
 
 // ============================================================================
